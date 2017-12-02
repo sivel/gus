@@ -62,6 +62,7 @@ var app = new Moon({
             var login = storage.get('login');
 
             if (!token || !login) {
+                self.set('show', false);
                 return
             }
 
