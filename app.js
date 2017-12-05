@@ -72,7 +72,8 @@ var app = new Moon({
             requests = [
                 getIssues(token, 'is:issue assignee:' + login),
                 getIssues(token, 'is:pr assignee:' + login),
-                getIssues(token, 'is:pr review-requested:' + login)
+                getIssues(token, 'is:pr review-requested:' + login),
+                getIssues(token, 'is:pr review:changes_requested reviewed-by:' + login)
             ];
             axios.all(requests).then(function(results) {
                 var issues = [];
