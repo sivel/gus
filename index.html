@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="ngApp">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,9 +9,10 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/3.5.0/octicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-block-ui/0.2.2/angular-block-ui.min.css" />
 
     <style>
-        [m-mask] {
+        [ng-cloak] {
             display: none;
         }
         * {
@@ -38,36 +39,89 @@
             left: 50%;
             top: 50%;
         }
+        li label {
+            padding: 5px;
+        }
+        #filters {
+            padding-bottom: 15px;
+        }
+        .dropdown-menu {
+            width: 200px;
+        }
+        /* Scrollable dropdown menus that are long */
+        .dropdown-menu {
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Force enable a scrollbar in webkit, where it may be hidden by default */
+        ::-webkit-scrollbar {
+            -webkit-appearance: none;
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border-radius: 4px;
+            background-color: rgba(0,0,0,.5);
+            -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+        }
     </style>
 
   </head>
-  <body>
-    <div id="app" m-mask>
-        <div id="outer" m-show="!show">
+  <body ng-controller="mainController" ng-cloak>
+    <div id="app">
+        <div id="outer" ng-show="!show">
             <div id="inner">
-                <div class="form-group">
-                    <input type="text" class="form-control input-lg" id="token" placeholder="GitHub OAuth Token" m-model="token" m-on:keyup.enter="setToken" autofocus='autofocus' autocomplete='off'>
-                </div>
+                <form ng-submit="setToken()">
+                    <div class="form-group">
+                        <input type="text" class="form-control input-lg" id="token" placeholder="GitHub OAuth Token" ng-model="token" autofocus='autofocus' autocomplete='off'>
+                    </div>
+                </form>
             </div>
         </div>
          <div class="container">
             <div class="row">
-               <div class="" m-show="show">
+               <div class="" ng-show="show">
                     <h1 class="text-center">My Assigned GitHub Stuff</h1>
+
+                    <div id="filters">
+                        <div class="btn-group" uib-dropdown auto-close="outsideClick">
+                            <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle ng-disabled="disabled">
+                                Repositories <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                                <li ng-repeat="repo in repos"><label><input ng-click="toggleRepoIgnore(repo)" type="checkbox" ng-checked="isRepoActive(repo)">&nbsp;{{repo}}</label></li>
+                            </ul>
+                        </div>
+
+                        <div class="btn-group" uib-dropdown auto-close="outsideClick">
+                            <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle ng-disabled="disabled">
+                                Labels <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                                <li ng-repeat="label in labels">
+                                    <label>
+                                        <input ng-click="toggleLabelIgnore(label.name)" type="checkbox" ng-checked="isLabelActive(label.name)">&nbsp;
+                                        <span class="label" style="background-color: #{{label.color}}; color: {{label.text_color}}; margin: 3px;">{{label.name}}</span>
+                                    </label></li>
+                            </ul>
+                        </div>
+                    </div>
                     <table class="table table-condensed">
                         <tbody>
-                            <tr m-for="issue in issues">
-                                <td m-if="issue.is_pull_request"><span class="octicon octicon-git-pull-request open"></span></td>
-                                <td m-if="!issue.is_pull_request"></td>
+                            <tr ng-repeat="issue in issues | filter:filterIssues">
+                                <td ng-if="issue.is_pull_request"><span class="octicon octicon-git-pull-request open"></span></td>
+                                <td ng-if="!issue.is_pull_request"></td>
                                 <td>
                                     <div>
                                         <a class="lead text-muted" href="{{issue.repository.html_url}}">{{issue.repository.name}}</a>
                                         <a class="lead" href="{{issue.html_url}}">{{issue.title}}</a>
-                                        <span m-for="label in issue.labels" class="label" style="background-color: #{{label.color}}; color: {{label.text_color}}; margin: 3px;">{{label.name}}</span>
+                                        <span ng-repeat="label in issue.labels" class="label" style="background-color: #{{label.color}}; color: {{label.text_color}}; margin: 3px;">{{label.name}}</span>
                                     </div>
                                     <div class="small">
                                         <span class='text-muted'>
-                                            #{{issue.number}} opened {{issue.created_at_human}} by <a class="text-muted" href="https://github.com/issues?q=is%3Apr+is%3Aopen+author%3A{{issue.user.login}}">{{issue.user.login}}</a><span m-if="issue.review_requested"> • Review Requested</span>
+                                            #{{issue.number}} opened {{issue.created_at_human}} by <a class="text-muted" href="https://github.com/issues?q=is%3Apr+is%3Aopen+author%3A{{issue.user.login}}">{{issue.user.login}}</a><span ng-if="issue.review_requested"> • Review Requested</span>
 
                                         </span>
                                     </div>
@@ -80,8 +134,9 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/moonjs"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-block-ui/0.2.2/angular-block-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.3/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.1/tinycolor.min.js"></script>
     <script src="app.js"></script>
