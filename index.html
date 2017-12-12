@@ -115,13 +115,13 @@
                                 <td ng-if="!issue.is_pull_request"></td>
                                 <td>
                                     <div>
-                                        <a class="lead text-muted" href="{{issue.repository.html_url}}">{{issue.repository.name}}</a>
-                                        <a class="lead" href="{{issue.html_url}}">{{issue.title}}</a>
+                                        <a class="lead text-muted" target="_blank" href="{{issue.repository.html_url}}">{{issue.repository.name}}</a>
+                                        <a class="lead" target="_blank" href="{{issue.html_url}}">{{issue.title}}</a>
                                         <span ng-repeat="label in issue.labels" class="label" style="background-color: #{{label.color}}; color: {{label.text_color}}; margin: 3px;">{{label.name}}</span>
                                     </div>
                                     <div class="small">
                                         <span class='text-muted'>
-                                            #{{issue.number}} opened {{issue.created_at_human}} by <a class="text-muted" href="https://github.com/issues?q=is%3Apr+is%3Aopen+author%3A{{issue.user.login}}">{{issue.user.login}}</a><span ng-if="issue.review_requested"> • Review Requested</span>
+                                            #{{issue.number}} opened {{issue.created_at_human}} by <a class="text-muted" target="_blank" href="https://github.com/issues?q=is%3Apr+is%3Aopen+author%3A{{issue.user.login}}">{{issue.user.login}}</a><span ng-if="issue.review_requested"> • Review Requested</span>
 
                                         </span>
                                     </div>
